@@ -46,7 +46,7 @@ class Rocket:
     name : str
         Navn på raketten (brukes i plott-legend).
     mass_total : float
-        Total masse inkl. drivstoff ved oppskytning [kg].
+        Total masse inkl. motor ved oppskytning [kg].
     diameter : float
         Diameter på rakettens største tverrsnitt [m].
     thrust : float
@@ -54,11 +54,8 @@ class Rocket:
     thrust_duration : float
         Brenntid for motoren [s].
     angle_deg : float
-        Avfyringsvinkel målt fra vertikalen [grader].
-        0° = rett opp, 30° = 30° fra loddlinjen.
-    fuel_mass : float
-        Masse av drivstoffet som forbrennes [kg].
-        Standard 0 (massekonstant simulering).
+        Avfyringsvinkel målt fra horisontalen [grader].
+        0° = horisontalt, 90° = rett opp.
     color : str
         Farge for plottlinjen (matplotlib fargenavn).
     """
@@ -68,8 +65,7 @@ class Rocket:
     diameter: float
     thrust: float
     thrust_duration: float
-    angle_deg: float = 0.0
-    fuel_mass: float = 0.0
+    angle_deg: float = 90.0
     color: str = "C0"
 
     # Avledet feltene fylles ut av __post_init__
@@ -99,18 +95,13 @@ def _derivatives(state: np.ndarray, t: float, rocket: Rocket) -> np.ndarray:
     """
     x, y, vx, vy = state
 
-    # --- Aktuell masse ---
-    if t < rocket.thrust_duration and rocket.fuel_mass > 0.0:
-        burn_rate = rocket.fuel_mass / rocket.thrust_duration
-        mass = rocket.mass_total - burn_rate * t
-        mass = max(mass, rocket.mass_total - rocket.fuel_mass)
-    else:
-        mass = rocket.mass_total - rocket.fuel_mass
+    # --- Aktuell masse (konstant – total masse inkl. motor) ---
+    mass = rocket.mass_total
 
     # --- Skyvekraft (langs innledende skyteretning) ---
     if t < rocket.thrust_duration:
-        Ftx = rocket.thrust * np.sin(rocket.angle_rad)
-        Fty = rocket.thrust * np.cos(rocket.angle_rad)
+        Ftx = rocket.thrust * np.cos(rocket.angle_rad)
+        Fty = rocket.thrust * np.sin(rocket.angle_rad)
     else:
         Ftx = Fty = 0.0
 
@@ -239,18 +230,16 @@ DEFAULT_ROCKETS: List[Rocket] = [
         diameter=0.030,        # 30 mm
         thrust=15.0,           # 15 N
         thrust_duration=1.5,   # 1.5 s
-        angle_deg=0.0,
-        fuel_mass=0.020,       # 20 g drivstoff
+        angle_deg=90.0,        # 90° fra horisontalen = rett opp
         color="royalblue",
     ),
     Rocket(
-        name="Rakett B – 20° vinkel",
+        name="Rakett B – 70° vinkel",
         mass_total=0.150,
         diameter=0.030,
         thrust=15.0,
         thrust_duration=1.5,
-        angle_deg=20.0,
-        fuel_mass=0.020,
+        angle_deg=70.0,        # 70° fra horisontalen
         color="tomato",
     ),
     Rocket(
@@ -259,8 +248,7 @@ DEFAULT_ROCKETS: List[Rocket] = [
         diameter=0.035,        # 35 mm
         thrust=30.0,           # 30 N
         thrust_duration=2.0,
-        angle_deg=0.0,
-        fuel_mass=0.040,
+        angle_deg=90.0,        # rett opp
         color="seagreen",
     ),
 ]
@@ -303,7 +291,7 @@ def main() -> None:
         print(f"    Diameter:          {rocket.diameter*1000:.0f} mm")
         print(f"    Skyvekraft:        {rocket.thrust:.1f} N")
         print(f"    Brenntid:          {rocket.thrust_duration:.2f} s")
-        print(f"    Avfyringsvinkel:   {rocket.angle_deg:.1f}°")
+        print(f"    Avfyringsvinkel:   {rocket.angle_deg:.1f}° (fra horisontal)")
         print(f"    Tverrsnittareal:   {rocket.area*1e4:.2f} cm²")
 
         t, x, y, vx, vy = simulate(rocket)
