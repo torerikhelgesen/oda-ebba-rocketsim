@@ -20,6 +20,7 @@
    - [Masse](#masse)
    - [Bevegelsesligningene](#bevegelsesligningene)
    - [Numerisk integrasjon – Runge-Kutta 4. orden (RK4)](#numerisk-integrasjon--runge-kutta-4-orden-rk4)
+   - [Fallskjerm](#fallskjerm)
 5. [Plottene som produseres](#plottene-som-produseres)
 6. [Eksempel på resultater](#eksempel-på-resultater)
 7. [Filstruktur](#filstruktur)
@@ -35,6 +36,7 @@ Programmet `rocket_sim.py` simulerer flybanen til én eller flere modelraketter 
 - **Luftmotstand** beregnet med en realistisk luftmotstandskoeffisient for raketter med ogivnese
 - **Varierende lufttetthet** med høyden (barometrisk formel)
 - **Drivstofforbruk** som reduserer massen under brennfasen
+- **Fallskjerm** (valgfritt) – bremser den horisontale hastigheten ned til vindhastigheten etter at fallskjermen har åpnet
 
 Simulatoren bruker **4. ordens Runge-Kutta (RK4)** for presis numerisk integrasjon av bevegelsesligningene.
 
@@ -87,6 +89,10 @@ Rakettkonfigurasjonen beskrives med `Rocket`-klassen. Enten bruker du standard-l
 | `thrust_duration` | `float` | s | Brenntid for motoren |
 | `angle_deg` | `float` | grader | Avfyringsvinkel fra horisontalen (0° = horisontalt, 90° = rett opp) |
 | `color` | `str` | – | Farge på plottkurven (matplotlib-fargenavn) |
+| `parachute_enabled` | `bool` | – | `True` hvis raketten har fallskjerm, `False` ellers (standard: `False`) |
+| `parachute_deploy_time` | `float` | s | Tid fra motorstans til fallskjermen åpner (standard: `0.0`) |
+| `parachute_brake_time` | `float` | s | Tid fra fallskjermen åpner til raketten har bremsset ned til endelig horisontal drifthastighet (standard: `5.0`) |
+| `wind_speed` | `float` | m/s | Endelig horisontal drifthastighet etter bremsing – tilsvarer vindhastigheten (standard: `0.0`) |
 
 ### Eksempel på konfigurasjonsfil
 
@@ -102,6 +108,19 @@ ROCKETS = [
         thrust_duration=1.7,   # 1.7 s
         angle_deg=45.0,        # 45° fra horisontalen
         color="royalblue",
+    ),
+    Rocket(
+        name="Min rakett med fallskjerm",
+        mass_total=0.058,
+        diameter=0.029,
+        thrust=5.0,
+        thrust_duration=1.7,
+        angle_deg=45.0,
+        color="tomato",
+        parachute_enabled=True,
+        parachute_deploy_time=2.0,   # fallskjerm åpner 2 s etter motorstans
+        parachute_brake_time=3.0,    # 3 s å bremse ned til vindhastighet
+        wind_speed=3.0,              # 3 m/s vindhastighet (endelig horisontal drift)
     ),
 ]
 ```
@@ -293,6 +312,39 @@ y(t + h) = y(t) + (h/6) · (k1 + 2·k2 + 2·k3 + k4)
 - Globalfeil er av orden `O(h⁴)` – svært liten ved `h = 0,01 s`
 
 RK4 er standardmetoden for fysikksimuleringer der nøyaktighet er viktigere enn beregningshastighet.
+
+---
+
+### Fallskjerm
+
+Hvis en rakett er konfigurert med `parachute_enabled=True`, simuleres følgende atferd etter at motoren har brent ut:
+
+```
+Tid etter motorstans
+│
+├─── 0 s ─────────────────── parachute_deploy_time ───► Fallskjerm åpner
+│                                                         │
+│                                                         ├── parachute_brake_time ──► Bremset ned til wind_speed
+│                                                         │
+│                                                         └── Etter bremsetid: vx = wind_speed (konstant drift)
+```
+
+| Fase | Beskrivelse |
+|---|---|
+| **Ballistisk fase** | Fra motorstans til fallskjermen åpner: normal ballistisk flukt (tyngdekraft + luftmotstand) |
+| **Bremsefase** | Horisontal hastighet interpoleres lineært fra gjeldende verdi ned til `wind_speed` over `parachute_brake_time` sekunder |
+| **Driftfase** | Horisontal hastighet holdes konstant lik `wind_speed` (vinden driver raketten sidelengs) |
+
+Vertikal hastighet påvirkes ikke av fallskjermmodellen – raketten fortsetter å falle under tyngdekraft og luftmotstand.
+
+**Parametere:**
+
+| Parameter | Beskrivelse |
+|---|---|
+| `parachute_enabled` | Aktiver fallskjerm (`True`/`False`) |
+| `parachute_deploy_time` | Sekunder fra motorstans til fallskjerm åpner |
+| `parachute_brake_time` | Sekunder fra åpning til endelig horisontal drifthastighet er nådd |
+| `wind_speed` | Vindhastigheten [m/s] – endelig horisontal drifthastighet etter bremsetiden |
 
 ---
 

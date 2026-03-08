@@ -11,7 +11,7 @@ from rocket import Rocket
 
 ROCKETS = [
     # -----------------------------------------------------------------------
-    # Rakett 1 – 35° fra horisontal
+    # Rakett 1 – 35° fra horisontal, ingen fallskjerm
     # -----------------------------------------------------------------------
     Rocket(
         name="Rakett 1 – 35°",
@@ -23,7 +23,7 @@ ROCKETS = [
         color="steelblue",
     ),
     # -----------------------------------------------------------------------
-    # Rakett 2 – 45° fra horisontal
+    # Rakett 2 – 45° fra horisontal, ingen fallskjerm
     # -----------------------------------------------------------------------
     Rocket(
         name="Rakett 2 – 45°",
@@ -35,27 +35,35 @@ ROCKETS = [
         color="darkorange",
     ),
     # -----------------------------------------------------------------------
-    # Rakett 3 – 55° fra horisontal
+    # Rakett 3 – 55° fra horisontal, med fallskjerm
     # -----------------------------------------------------------------------
     Rocket(
-        name="Rakett 3 – 55°",
+        name="Rakett 3 – 55° (fallskjerm)",
         mass_total=0.058,
         diameter=0.029,
         thrust=5.0,
         thrust_duration=1.7,
         angle_deg=55.0,        # 55° fra horisontalen
         color="mediumseagreen",
+        parachute_enabled=True,
+        parachute_deploy_time=2.0,   # 2 s etter motorstans åpner fallskjermen
+        parachute_brake_time=3.0,    # 3 s å bremse ned til vindhastighet
+        wind_speed=3.0,              # 3 m/s vindhastighet (endelig horisontal drift)
     ),
     # -----------------------------------------------------------------------
-    # Rakett 4 – 65° fra horisontal
+    # Rakett 4 – 65° fra horisontal, med fallskjerm
     # -----------------------------------------------------------------------
     Rocket(
-        name="Rakett 4 – 65°",
+        name="Rakett 4 – 65° (fallskjerm)",
         mass_total=0.058,
         diameter=0.029,
         thrust=5.0,
         thrust_duration=1.7,
         angle_deg=65.0,        # 65° fra horisontalen
         color="crimson",
+        parachute_enabled=True,
+        parachute_deploy_time=2.0,   # 2 s etter motorstans åpner fallskjermen
+        parachute_brake_time=3.0,    # 3 s å bremse ned til vindhastighet
+        wind_speed=3.0,              # 3 m/s vindhastighet (endelig horisontal drift)
     ),
 ]

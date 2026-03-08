@@ -92,6 +92,13 @@ def simulate(
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Simuler rakettbane med 4. ordens Runge-Kutta.
 
+    Inkluderer valgfri fallskjermsimulering:
+      - Fallskjermen åpner ``parachute_deploy_time`` sekunder etter motorstans.
+      - Horisontal hastighet bremses lineært ned til ``wind_speed`` over
+        ``parachute_brake_time`` sekunder etter åpning.
+      - Etter bremsetiden holder raketten horisontal drifthastighet lik
+        ``wind_speed`` til landing.
+
     Returner
     --------
     t  : tidsvektor [s]
@@ -102,6 +109,11 @@ def simulate(
     """
     state = np.array([0.0, 0.0, 0.0, 0.0])
     t = 0.0
+
+    # Fallskjerm-tilstandsvariabler
+    parachute_deployed = False
+    t_deploy: float = 0.0
+    vx_at_deploy: float = 0.0
 
     results = [[t, state[0], state[1], state[2], state[3]]]
 
@@ -114,6 +126,26 @@ def simulate(
 
         state = state + (dt / 6.0) * (k1 + 2 * k2 + 2 * k3 + k4)
         t += dt
+
+        # --- Fallskjermhåndtering ---
+        if rocket.parachute_enabled:
+            t_parachute_deploy = rocket.thrust_duration + rocket.parachute_deploy_time
+
+            # Registrer tidspunkt og horisontal hastighet når fallskjermen åpner
+            if not parachute_deployed and t >= t_parachute_deploy:
+                parachute_deployed = True
+                t_deploy = t
+                vx_at_deploy = state[2]
+
+            if parachute_deployed:
+                elapsed = t - t_deploy
+                if rocket.parachute_brake_time > 0 and elapsed <= rocket.parachute_brake_time:
+                    # Lineær interpolasjon av horisontal hastighet mot vindhastighet
+                    alpha = elapsed / rocket.parachute_brake_time
+                    state[2] = vx_at_deploy + alpha * (rocket.wind_speed - vx_at_deploy)
+                else:
+                    # Bremsetiden er over – hold endelig drifthastighet
+                    state[2] = rocket.wind_speed
 
         results.append([t, state[0], state[1], state[2], state[3]])
 
@@ -248,6 +280,13 @@ def main() -> None:
         print(f"    Brenntid:          {rocket.thrust_duration:.2f} s")
         print(f"    Avfyringsvinkel:   {rocket.angle_deg:.1f}° (fra horisontal)")
         print(f"    Tverrsnittareal:   {rocket.area*1e4:.2f} cm²")
+        if rocket.parachute_enabled:
+            print(f"    Fallskjerm:        Ja")
+            print(f"      – Tid fra motorstans til åpning: {rocket.parachute_deploy_time:.1f} s")
+            print(f"      – Bremsingstid:                  {rocket.parachute_brake_time:.1f} s")
+            print(f"      – Vindhastighet (slutt-vx):      {rocket.wind_speed:.1f} m/s")
+        else:
+            print(f"    Fallskjerm:        Nei")
 
         t, x, y, vx, vy = simulate(rocket)
         results.append((t, x, y, vx, vy))
