@@ -7,7 +7,7 @@ Kjør simulatoren med:
     python rocket_sim.py rockets_config.py
 """
 
-from rocket_sim import Rocket
+from rocket import Rocket
 
 ROCKETS = [
     # -----------------------------------------------------------------------

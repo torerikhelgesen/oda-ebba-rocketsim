@@ -23,6 +23,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
+from rocket import Rocket
+from rockets_config import ROCKETS
+
 # ---------------------------------------------------------------------------
 # Fysiske konstanter
 # ---------------------------------------------------------------------------
@@ -34,47 +37,6 @@ H_SCALE = 8500    # skalahøyde for barometrisk formel [m]
 CD = 0.35
 
 
-# ---------------------------------------------------------------------------
-# Datastruktur for en rakett
-# ---------------------------------------------------------------------------
-@dataclass
-class Rocket:
-    """Konfigurasjonsparametere for én rakett.
-
-    Parametere
-    ----------
-    name : str
-        Navn på raketten (brukes i plott-legend).
-    mass_total : float
-        Total masse inkl. motor ved oppskytning [kg].
-    diameter : float
-        Diameter på rakettens største tverrsnitt [m].
-    thrust : float
-        Skyvekraft (gjennomsnittlig) fra motoren [N].
-    thrust_duration : float
-        Brenntid for motoren [s].
-    angle_deg : float
-        Avfyringsvinkel målt fra horisontalen [grader].
-        0° = horisontalt, 90° = rett opp.
-    color : str
-        Farge for plottlinjen (matplotlib fargenavn).
-    """
-
-    name: str
-    mass_total: float
-    diameter: float
-    thrust: float
-    thrust_duration: float
-    angle_deg: float = 90.0
-    color: str = "C0"
-
-    # Avledet feltene fylles ut av __post_init__
-    area: float = field(init=False, repr=False)
-    angle_rad: float = field(init=False, repr=False)
-
-    def __post_init__(self) -> None:
-        self.area = np.pi * (self.diameter / 2) ** 2
-        self.angle_rad = np.radians(self.angle_deg)
 
 
 # ---------------------------------------------------------------------------
@@ -274,14 +236,7 @@ def load_rockets_from_module(path: str) -> List[Rocket]:
 
 
 def main() -> None:
-    if len(sys.argv) > 1:
-        config_path = sys.argv[1]
-        print(f"Laster konfigurasjon fra '{config_path}' ...")
-        rockets = load_rockets_from_module(config_path)
-    else:
-        print("Bruker standardkonfigurasjon (tre eksempelraketter) ...")
-        rockets = DEFAULT_ROCKETS
-
+    rockets = ROCKETS
     print(f"\nSimulerer {len(rockets)} rakett(er) ...\n")
 
     results = []

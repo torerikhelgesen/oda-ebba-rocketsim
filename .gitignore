@@ -189,7 +189,7 @@ cython_debug/
 # .vscode/
 
 # Genererte simuleringsplott
-rakett_simulering.png
+rakett_simulering_uten_fallskjerm_ideell.png
 
 # Ruff stuff:
 .ruff_cache/
