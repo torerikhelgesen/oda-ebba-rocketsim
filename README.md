@@ -17,7 +17,7 @@
    - [Luftmotstand](#luftmotstand)
    - [Nesekonens betydning](#nesekonens-betydning)
    - [Lufttetthet som funksjon av høyde](#lufttetthet-som-funksjon-av-høyde)
-   - [Variabel masse – Tsiolkovskijs prinsipp](#variabel-masse--tsiolkovskijs-prinsipp)
+   - [Masse](#masse)
    - [Bevegelsesligningene](#bevegelsesligningene)
    - [Numerisk integrasjon – Runge-Kutta 4. orden (RK4)](#numerisk-integrasjon--runge-kutta-4-orden-rk4)
 5. [Plottene som produseres](#plottene-som-produseres)
@@ -81,12 +81,11 @@ Rakettkonfigurasjonen beskrives med `Rocket`-klassen. Enten bruker du standard-l
 | Parameter | Type | Enhet | Beskrivelse |
 |---|---|---|---|
 | `name` | `str` | – | Navn på raketten (vises i plott) |
-| `mass_total` | `float` | kg | Total masse ved oppskytning inkl. drivstoff |
+| `mass_total` | `float` | kg | Total masse ved oppskytning inkl. motor |
 | `diameter` | `float` | m | Ytterdiameter på raketten |
 | `thrust` | `float` | N | Gjennomsnittlig motorskyvekraft |
 | `thrust_duration` | `float` | s | Brenntid for motoren |
-| `angle_deg` | `float` | grader | Avfyringsvinkel fra vertikalen (0° = rett opp) |
-| `fuel_mass` | `float` | kg | Masse av drivstoffet som forbrennes (0 = konstant masse) |
+| `angle_deg` | `float` | grader | Avfyringsvinkel fra horisontalen (0° = horisontalt, 90° = rett opp) |
 | `color` | `str` | – | Farge på plottkurven (matplotlib-fargenavn) |
 
 ### Eksempel på konfigurasjonsfil
@@ -97,12 +96,11 @@ from rocket_sim import Rocket
 ROCKETS = [
     Rocket(
         name="Min rakett",
-        mass_total=0.150,      # 150 g
+        mass_total=0.058,      # 58 g total masse inkl. motor
         diameter=0.029,        # 29 mm
-        thrust=12.0,           # 12 N
-        thrust_duration=1.2,   # 1.2 s
-        angle_deg=10.0,        # 10° fra loddlinjen
-        fuel_mass=0.018,       # 18 g drivstoff
+        thrust=5.0,            # 5 N
+        thrust_duration=1.7,   # 1.7 s
+        angle_deg=45.0,        # 45° fra horisontalen
         color="royalblue",
     ),
 ]
@@ -119,14 +117,14 @@ Vi bruker et todimensjonalt koordinatsystem:
 - **x-akse** – horisontal retning (positiv i skyteretningens horisontale komponent)
 - **y-akse** – vertikal retning (positiv oppover)
 
-Raketten skytes ut fra origo `(0, 0)` med en vinkel `θ` (theta) målt fra vertikalen.
+Raketten skytes ut fra origo `(0, 0)` med en vinkel `θ` (theta) målt fra horisontalen.
 
 ```
 y ↑
-  |   /  ← rakettbane
-  |  /
-  | /  θ ← vinkel fra vertikalen
-  |/________→ x
+  |      /  ← rakettbane
+  |     /
+  |    /  θ ← vinkel fra horisontalen
+  |___/________→ x
 ```
 
 ---
@@ -167,8 +165,8 @@ I vektorform: `F_g = (0, −m·g)`
 Motoren brenner i `t_burn` sekunder og produserer en skyvekraft `F_T` langs den innledende skyteretningen:
 
 ```
-F_Tx = F_T · sin(θ)     (horisontal komponent)
-F_Ty = F_T · cos(θ)     (vertikal komponent)
+F_Tx = F_T · cos(θ)     (horisontal komponent)
+F_Ty = F_T · sin(θ)     (vertikal komponent)
 ```
 
 For `t > t_burn`:  `F_Tx = F_Ty = 0`
@@ -249,16 +247,15 @@ For modelraketter (maks 1–3 km) er effekten liten (ca. 10–30 % redusert tett
 
 ---
 
-### Variabel masse – Tsiolkovskijs prinsipp
+### Masse
 
-Når motoren brenner forbrukes drivstoff og rakettens masse synker. Massen som funksjon av tid under brenningen:
+Massen er konstant gjennom hele flukten og er lik `mass_total` – total masse inkl. motor ved oppskytning:
 
 ```
-m(t) = m_total − (m_drivstoff / t_burn) · t     for  0 ≤ t ≤ t_burn
-m(t) = m_total − m_drivstoff                    for  t > t_burn
+m(t) = m_total     (konstant)
 ```
 
-Den reduserte massen gir høyere akselerasjon mot slutten av brennfasen (*Tsiolkovskijs rakettproblem*). For typiske modelraketter er drivstoffmassen 10–20 % av totalmassen, og effekten er merkbar.
+Denne forenklingen er god for typiske modelraketter der motormassen er liten i forhold til totalvekten.
 
 ---
 
@@ -319,13 +316,14 @@ I legenden for baneplottet vises:
 
 ## Eksempel på resultater
 
-Kjøring med `rockets_config.py` (tre raketter):
+Kjøring med `rockets_config.py` (fire raketter):
 
 | Rakett | Masse | Skyvekraft | Vinkel | Maks høyde | Rekkevidde | Flygetid |
 |---|---|---|---|---|---|---|
-| Mini-Alfa | 100 g | 10 N | 0° | 322 m | 0 m | 16,8 s |
-| Midt-Beta | 180 g | 20 N | 15° | 806 m | 599 m | 26,7 s |
-| Stor-Gamma | 300 g | 45 N | 30° | 1245 m | 1559 m | 33,3 s |
+| Rakett 1 | 58 g | 5 N | 35° | 144 m | 585 m | 11,6 s |
+| Rakett 2 | 58 g | 5 N | 45° | 210 m | 571 m | 13,8 s |
+| Rakett 3 | 58 g | 5 N | 55° | 272 m | 513 m | 15,7 s |
+| Rakett 4 | 58 g | 5 N | 65° | 326 m | 414 m | 17,2 s |
 
 ---
 

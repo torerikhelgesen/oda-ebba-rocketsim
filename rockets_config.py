@@ -1,5 +1,5 @@
 """
-rockets_config.py – Eksempelkonfigurasjon for rakettsimulator
+rockets_config.py – Konfigurasjon for rakettsimulator
 
 Definer listen ROCKETS med Rocket-objekter.
 Kjør simulatoren med:
@@ -11,42 +11,51 @@ from rocket_sim import Rocket
 
 ROCKETS = [
     # -----------------------------------------------------------------------
-    # Klassisk liten hobbyrakett, rett opp
+    # Rakett 1 – 35° fra horisontal
     # -----------------------------------------------------------------------
     Rocket(
-        name="Mini-Alfa – Rett opp",
-        mass_total=0.100,      # 100 g total masse
+        name="Rakett 1 – 35°",
+        mass_total=0.058,      # 58 g total masse inkl. motor
         diameter=0.029,        # 29 mm diameter
-        thrust=10.0,           # 10 N skyvekraft
-        thrust_duration=1.0,   # 1 s brenntid
-        angle_deg=0.0,         # rett opp
-        fuel_mass=0.015,       # 15 g drivstoff
+        thrust=5.0,            # 5 N skyvekraft
+        thrust_duration=1.7,   # 1.7 s brenntid
+        angle_deg=35.0,        # 35° fra horisontalen
         color="steelblue",
     ),
     # -----------------------------------------------------------------------
-    # Mellomklasse rakett med 15° vinkel
+    # Rakett 2 – 45° fra horisontal
     # -----------------------------------------------------------------------
     Rocket(
-        name="Midt-Beta – 15° vinkel",
-        mass_total=0.180,      # 180 g
-        diameter=0.032,        # 32 mm
-        thrust=20.0,           # 20 N
-        thrust_duration=1.8,   # 1.8 s
-        angle_deg=15.0,        # 15° fra vertikalen
-        fuel_mass=0.025,       # 25 g
+        name="Rakett 2 – 45°",
+        mass_total=0.058,
+        diameter=0.029,
+        thrust=5.0,
+        thrust_duration=1.7,
+        angle_deg=45.0,        # 45° fra horisontalen
         color="darkorange",
     ),
     # -----------------------------------------------------------------------
-    # Større rakett med kraftig motor og høy vinkel
+    # Rakett 3 – 55° fra horisontal
     # -----------------------------------------------------------------------
     Rocket(
-        name="Stor-Gamma – 30° vinkel",
-        mass_total=0.300,      # 300 g
-        diameter=0.040,        # 40 mm
-        thrust=45.0,           # 45 N
-        thrust_duration=2.5,   # 2.5 s
-        angle_deg=30.0,        # 30° fra vertikalen
-        fuel_mass=0.060,       # 60 g
+        name="Rakett 3 – 55°",
+        mass_total=0.058,
+        diameter=0.029,
+        thrust=5.0,
+        thrust_duration=1.7,
+        angle_deg=55.0,        # 55° fra horisontalen
         color="mediumseagreen",
+    ),
+    # -----------------------------------------------------------------------
+    # Rakett 4 – 65° fra horisontal
+    # -----------------------------------------------------------------------
+    Rocket(
+        name="Rakett 4 – 65°",
+        mass_total=0.058,
+        diameter=0.029,
+        thrust=5.0,
+        thrust_duration=1.7,
+        angle_deg=65.0,        # 65° fra horisontalen
+        color="crimson",
     ),
 ]
